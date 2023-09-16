@@ -1,2 +1,1 @@
-# mi-primer-repositorio
-veamos qpd
+Aqui guardare todos mis ejercicios, trabajos o avances en python
