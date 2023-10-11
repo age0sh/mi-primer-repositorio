@@ -152,18 +152,8 @@ def registrar():
     # Almacenar respuestas de seguridad
     respuestas_numero[ultimo_indice].append(respuesta_numero)
     respuestas_hogar[ultimo_indice].append(respuesta_hogar)
+    guardar_datos()
 
-with open("matriz_user.json", "w") as f:
-    json.dump(matriz_user, f)
-
-with open("matriz_pass.json", "w") as f:
-    json.dump(matriz_pass, f)
-
-with open("respuestas_numero.json", "w") as f:
-    json.dump(respuestas_numero, f)
-
-with open("respuestas_hogar.json", "w") as f:
-    json.dump(respuestas_hogar, f)
 
 # Función para iniciar sesión
 def login():
@@ -182,6 +172,7 @@ def login():
 
 # Función para el submenu dentro de iniciar sesión
 def submenu():
+    limpiar_pantalla()
     while True:
         limpiar_pantalla()
         print("Bienvenido al sistema de registro de usuarios")
@@ -280,13 +271,15 @@ def cambiarcontraseña():
                 matriz_pass[indice_usuario] = list(nueva_contraseña)
                 print("Contraseña cambiada con éxito.")
                 input("Presione cualquier tecla para continuar...")
-                limpiar_pantalla()
+                
+                guardar_datos()
             else:
                 print("La nueva contraseña no cumple con los requisitos.")
-                limpiar_pantalla()
+                input("Presione cualquier tecla para continuar...")
+                
         else:
             print("Las respuestas de seguridad no coinciden.")
-            limpiar_pantalla()
+            input("Presione cualquier tecla para continuar...")
     else:
         print("Usuario no encontrado.")
         limpiar_pantalla()
@@ -297,10 +290,10 @@ def eliminarusuario():
 
     usuario = input("Ingrese su usuario: ")
 
-    # Buscar el usuario en la matriz de usuarios
+    # Buscar el usuario en la lista de usuarios
     indice_usuario = None
-    for i in range(ultimo_indice + 1):
-        if "".join(matriz_user[i]).strip() == usuario:
+    for i, user in enumerate(usuario):
+        if user["nombre"] == usuario:
             indice_usuario = i
             break
 
@@ -310,46 +303,34 @@ def eliminarusuario():
 
         # Verificar si las respuestas coinciden con las almacenadas
         if (
-            respuestas_numero[indice_usuario] == [respuesta_numero]
-            and respuestas_hogar[indice_usuario] == [respuesta_hogar]
+            usuario[indice_usuario]["respuestas_numero"] == [respuesta_numero]
+            and usuario[indice_usuario]["respuestas_hogar"] == [respuesta_hogar]
         ):
-            # Eliminar el usuario encontrado utilizando pop
-            matriz_user.pop(indice_usuario)
-            matriz_pass.pop(indice_usuario)
-            respuestas_numero.pop(indice_usuario)
-            respuestas_hogar.pop(indice_usuario)
-            ultimo_indice -= 1
+            # Eliminar el usuario de la lista en memoria
+            usuario.pop(indice_usuario)
+            ultimo_indice -= 1  # Actualizar el índice del último usuario registrado
 
-            print("Usuario eliminado con éxito")  # Mueve este mensaje aquí
+            print("Usuario eliminado con éxito")
+            input("Presione cualquier tecla para continuar...")
+
+            # Actualizar el archivo JSON inmediatamente
+            guardar_datos()
+
         else:
             print("Las respuestas de seguridad no coinciden.")
-
+            input("Presione cualquier tecla para continuar...")
     else:
         print("Usuario no encontrado.")
+        input("Presione cualquier tecla para continuar...")
 
-# Guardar datos actualizados en archivos JSON después de eliminar
-with open("matriz_user.json", "w") as f:
-    json.dump(matriz_user, f)
 
-with open("matriz_pass.json", "w") as f:
-    json.dump(matriz_pass, f)
-
-with open("respuestas_numero.json", "w") as f:
-    json.dump(respuestas_numero, f)
-
-with open("respuestas_hogar.json", "w") as f:
-    json.dump(respuestas_hogar, f)
 
 # Función para realizar ordenamientos
 def ordenamientos():
     print("Elige uno de los siguientes ordenamientos")
     print("1. Burbuja")
     print("2. Burbuja mejorada")
-    print("3. Insert Sort")
-    print("4. Seleccion")
-    print("5. Quick Sort")
-    print("6. Merge Sort")
-    print("7. Volver al menu anterior")
+    print("3. Volver al menu anterior")
 
     opcion = input("Ingrese una opción: ")
     if opcion == "1":
@@ -359,249 +340,20 @@ def ordenamientos():
         limpiar_pantalla()
         burbuja_mejorada()
     elif opcion == "3":
-        limpiar_pantalla()
-        Insert_Sort()
-    elif opcion == "4":
-        limpiar_pantalla()
-        seleccion()
-    elif opcion == "5":
-        limpiar_pantalla()
-        quick_sort()
-    elif opcion == "6":
-        limpiar_pantalla()
-        merge_sort_analysis()
-    elif opcion == "7":
-        limpiar_pantalla()
+        return  
     else:
         print("Opción inválida")
 
 
-def burbuja():
-    lista = [
-        int(x) for x in input(
-            "Ingrese una lista de números separados por comas: ").split(",")
-    ]
-    n = len(lista)
-    iteraciones = 0
-    movimientos = 0
-    consultas = 0
-
-    for i in range(n):
-        ordenado = True
-        for j in range(n - i - 1):
-            iteraciones += 1
-            consultas += 2
-            if lista[j] > lista[j + 1]:
-                lista[j], lista[j + 1] = lista[j + 1], lista[j]
-                movimientos += 1
-                ordenado = False
-
-        if ordenado:
-            break
-
-    print(f"\nLista ordenada: {lista}")
-    print(f"Total de iteraciones: {iteraciones}")
-    print(f"Total de movimientos: {movimientos}")
-    print(f"Total de consultas: {consultas}")
-    
+# Función para ordenamiento burbuja
 
 
-def burbuja_mejorada():
-    lista = [
-        int(x) for x in input(
-            "Ingrese una lista de números separados por comas: ").split(",")
-    ]
-    n = len(lista)
-    iteraciones = 0
-    movimientos = 0
-    consultas = 0
-
-    for i in range(n):
-        intercambio = False
-        for j in range(n - i - 1):
-            iteraciones += 1
-            consultas += 2
-            if lista[j] > lista[j + 1]:
-                lista[j], lista[j + 1] = lista[j + 1], lista[j]
-                intercambio = True
-                movimientos += 1
-                print(f"Iteración {iteraciones}: {lista}"
-                      )  # imprimir iteración actual
-        if not intercambio:
-            break
-
-    print(f"\nLista ordenada: {lista}")
-    print(f"Total de iteraciones: {iteraciones}")
-    print(f"Total de movimientos: {movimientos}")
-    print(f"Total de consultas: {consultas/n:.1f}")
-
-    
-
-
-def Insert_Sort():
-    lista = input("Ingrese una lista de números separados por comas: ").split(
-        ",")
-    n = len(lista)
-    iteraciones = 0
-    movimientos = 0
-    consultas = 0
-
-    for i in range(1, n):
-        actual = lista[i]
-        j = i - 1
-        while j >= 0 and actual < lista[j]:
-            lista[j + 1] = lista[j]
-            j -= 1
-            iteraciones += 1
-            movimientos += 1
-            consultas += 2
-            print(f"Iteración {iteraciones}: {lista}"
-                  )  # imprimir iteración actual
-        lista[j + 1] = actual
-        movimientos += 1
-        print(f"Iteración {iteraciones}: {lista}")  # imprimir iteración actual
-
-    print(f"\nLista ordenada: {lista}")
-    print(f"Total de iteraciones: {iteraciones}")
-    print(f"Total de movimientos: {movimientos}")
-    print(f"Total de consultas: {consultas}")
-
-    
-
-
-def seleccion():
-    lista = input("Ingrese una lista de números separados por comas: ").split(
-        ",")
-    lista = [int(num) for num in lista]
-    n = len(lista)
-    iteraciones = 0
-    movimientos = 0
-    consultas = 0
-
-    for i in range(n):
-        minimo = i
-        for j in range(i + 1, n):
-            iteraciones += 1
-            consultas += 1
-            if lista[j] < lista[minimo]:
-                minimo = j
-        if minimo != i:
-            lista[i], lista[minimo] = lista[minimo], lista[i]
-            movimientos += 1
-
-    print(f"consultas: {consultas}")
-    print(f"movimientos: {movimientos}")
-    print(f"iteraciones: {iteraciones}")
-    print(f"lista ordenada: {lista}")
-    
-
-
-def quick_sort():
-    lista = input("Ingrese una lista de números separados por comas: ").split(
-        ",")
-    lista = [int(i) for i in lista]  # Convertir elementos a tipo entero
-    n = len(lista)
-    iteraciones = 0
-    movimientos = 0
-    consultas = 0
-
-    def ordenar(inicio, fin):
-        nonlocal iteraciones, movimientos, consultas
-        if inicio >= fin:
-            return
-        pivote = lista[inicio]
-        i, j = inicio + 1, fin
-        while i <= j:
-            iteraciones += 1
-            consultas += 2
-            if lista[i] > pivote and lista[j] < pivote:
-                lista[i], lista[j] = lista[j], lista[i]
-                movimientos += 2
-                i += 1
-                j -= 1
-            elif lista[i] <= pivote:
-                i += 1
-            elif lista[j] >= pivote:
-                j -= 1
-        lista[inicio], lista[j] = lista[j], lista[inicio]
-        movimientos += 2
-        print(f"Iteración {iteraciones}: {lista}")  # Imprimir iteración actual
-        ordenar(inicio, j - 1)
-        ordenar(j + 1, fin)
-
-    ordenar(0, n - 1)
-    print(f"\nLista ordenada: {lista}")
-    print(f"Total de iteraciones: {iteraciones}")
-    print(f"Total de movimientos: {movimientos}")
-    print(f"Total de consultas: {consultas}")
-
-    
-
-def merge_sort_analysis():
-    # Solicitar al usuario ingresar la lista de números separados por coma
-    input_list = input("Ingrese una lista de números separados por coma: ").split(",")
-    numbers = [int(num) for num in input_list]
-
-    # Llamar a la función merge_sort() para ordenar la lista y obtener los resultados
-    iterations, movements, queries = merge_sort(numbers)
-
-    # Imprimir los resultados
-    print("Lista ordenada:", numbers)
-    print("Número de iteraciones:", iterations)
-    print("Número de movimientos:", movements)
-    print("Número de consultas:", queries)
-
-def merge_sort(arr):
-    if len(arr) <= 1:
-        return 0, 0, 0
-
-    mid = len(arr) // 2
-    left_half = arr[:mid]
-    right_half = arr[mid:]
-
-    # Realizar recursivamente el ordenamiento en las sublistas izquierda y derecha
-    left_iterations, left_movements, left_queries = merge_sort(left_half)
-    right_iterations, right_movements, right_queries = merge_sort(right_half)
-
-    # Realizar el proceso de combinación (merge)
-    iterations = left_iterations + right_iterations + 1
-    movements = left_movements + right_movements + merge(arr, left_half, right_half)
-    queries = left_queries + right_queries + 1
-
-    return iterations, movements, queries
-
-def merge(arr, left_half, right_half):
-    i = j = k = 0
-    movements = 0
-
-    while i < len(left_half) and j < len(right_half):
-        if left_half[i] < right_half[j]:
-            arr[k] = left_half[i]
-            i += 1
-        else:
-            arr[k] = right_half[j]
-            j += 1
-        movements += 1
-        k += 1
-
-    while i < len(left_half):
-        arr[k] = left_half[i]
-        movements += 1
-        i += 1
-        k += 1
-
-    while j < len(right_half):
-        arr[k] = right_half[j]
-        movements += 1
-        j += 1
-        k += 1
-
-    return movements
-    
+#funcion para ordenamiento burbuja mejorada
 
 # Función principal
 def main():
     cargar_datos()
+    atexit.register(guardar_datos)  # Registrar la función de guardado al salir del programa
 
     while True:
         limpiar_pantalla()
@@ -619,14 +371,13 @@ def main():
             limpiar_pantalla()
             login()
         elif opcion == "3":
-            guardar_datos()  # Mueve esta línea aquí
             print("¡Hasta luego!")
             break
         else:
             print("Opción inválida")
 
-    # Mueve esta sección aquí para guardar datos al final
-    guardar_datos()
+   
+   
 
 if __name__ == "__main__":
     main()
