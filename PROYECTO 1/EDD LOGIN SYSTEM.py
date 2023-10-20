@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import *
 from PIL import Image, ImageTk 
 import os
+import time
 import json
 
 matriz_user = [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
@@ -449,6 +450,7 @@ def ventana_ordenamientos():
     panel = ttk.Notebook(ventana)
     panel.pack(expand=True, fill='both')
 
+################################################################## BURBUJA ####################################################################################################
     tab_burbuja = ttk.Frame(panel)
     panel.add(tab_burbuja, text="Burbuja")
 
@@ -489,18 +491,21 @@ def ventana_ordenamientos():
         # Función de ordenamiento de burbuja
         def burbuja(arr):
             n = len(arr)
-            movimientos = 0
             consultas = 0
-            for i in range(n - 1):
+            movimientos = 0
+            iteraciones = 0
+
+            for i in range(n):
                 for j in range(0, n - i - 1):
-                    consultas += 1
+                    iteraciones += 1
                     if arr[j] > arr[j + 1]:
+                        consultas += 1
                         arr[j], arr[j + 1] = arr[j + 1], arr[j]
                         movimientos += 1
 
-            return movimientos, consultas
+            return movimientos, consultas, iteraciones
 
-        movimientos, consultas = burbuja(numeros)
+        iteraciones, movimientos, consultas = burbuja(numeros)
 
         # Actualizar las etiquetas existentes
         lista_ordenada.config(text=f"Lista Ordenada: {numeros}")
@@ -515,6 +520,7 @@ def ventana_ordenamientos():
     botton_volver.pack(side="bottom", pady=10)
     botton_volver.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
 
+################################################################## BURBUJA MEJORADA ####################################################################################################
     tab_burbuja_mejorada = ttk.Frame(panel)
     panel.add(tab_burbuja_mejorada, text="Burbuja Mejorada")
 
@@ -545,6 +551,7 @@ def ventana_ordenamientos():
             return
 
         try:
+            # Dividir la entrada en una lista de números
             numeros = [int(x) for x in entrada.split(',')]
         except ValueError:
             resultado_label_mejorada.config(text="Error: Ingresa números válidos separados por comas.")
@@ -554,30 +561,266 @@ def ventana_ordenamientos():
             n = len(arr)
             movimientos = 0
             consultas = 0
-            swapped = True
-            while swapped:
+            for i in range(n - 1):
                 swapped = False
-                for i in range(1, n):
+                movimientos_pasada = 0  # Contador de movimientos en la pasada actual
+                for j in range(0, n - i - 1):
                     consultas += 1
-                    if arr[i - 1] > arr[i]:
-                        arr[i - 1], arr[i] = arr[i], arr[i - 1]
-                        movimientos += 1
+                    if arr[j] > arr[j + 1]:
+                        arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                        movimientos_pasada += 1
                         swapped = True
+                movimientos += movimientos_pasada
+                if not swapped:
+                    break
             return movimientos, consultas
 
         movimientos, consultas = burbuja_mejorada(numeros)
 
         lista_ordenada_mejorada.config(text=f"Lista Ordenada: {numeros}")
         lista_original_mejorada.config(text=f"Lista Original: {entrada}")
-        info_burbuja_mejorada.config(text=f"Iteraciones: {consultas}, Movimientos: {movimientos}")
-
+        info_burbuja_mejorada.config(text=f"Iteraciones: {len(numeros) - 1}, Movimientos: {movimientos}, Consultas: {consultas}")
+    
     boton_ordenar_mejorada = tk.Button(tab_burbuja_mejorada, text="Ordenar", command=ordenar_burbuja_mejorada)
     boton_ordenar_mejorada.pack(pady=10)
     boton_ordenar_mejorada.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white")
 
-    botton_volver = tk.Button(tab_burbuja_mejorada, text="Volver", height=1, width=15)
-    botton_volver.pack(side="bottom", pady=10)
-    botton_volver.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
+    botton_volver_mejorada = tk.Button(tab_burbuja_mejorada, text="Volver", height=1, width=15)
+    botton_volver_mejorada.pack(side="bottom", pady=10)
+    botton_volver_mejorada.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
+
+################################################################## INSERCIÓN ####################################################################################################
+
+    tab_insercion = ttk.Frame(panel)
+    panel.add(tab_insercion, text="Inserción")
+
+    etiqueta_insercion = tk.Label(tab_insercion, text="Ingresa los números a ordenar separados por comas", font=("Arial", 16, "bold"))
+    etiqueta_insercion.pack(pady=10)
+
+    entrada_insercion = tk.Entry(tab_insercion)
+    entrada_insercion.pack(pady=20)
+    entrada_insercion.config(font=("Arial", 12), borderwidth=2, relief="ridge", width=50, justify="center")
+
+    resultado_label_insercion = ttk.Label(tab_insercion, text="", font=("Arial", 12))
+    resultado_label_insercion.pack(pady=10)
+
+    lista_ordenada_insercion = ttk.Label(tab_insercion, text="", font=("Arial", 12))
+    lista_ordenada_insercion.pack(pady=10)
+
+    lista_original_insercion = ttk.Label(tab_insercion, text="", font=("Arial", 12))
+    lista_original_insercion.pack(pady=10)
+
+    info_insercion = ttk.Label(tab_insercion, text="", font=("Arial", 12))
+    info_insercion.pack(pady=10)
+
+    def ordenar_insercion():
+        entrada = entrada_insercion.get().strip()
+        
+        if not entrada:
+            resultado_label_insercion.config(text="Por favor, ingresa números separados por comas.")
+            return
+
+        try:
+            # Dividir la entrada en una lista de números
+            numeros = [int(x) for x in entrada.split(',')]
+        except ValueError:
+            resultado_label_insercion.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+        
+        def insercion(arr):
+            movimientos = 0
+            consultas = 0
+            for i in range(1, len(arr)):
+                key = arr[i]
+                j = i - 1
+                consultas += 1
+                while j >= 0 and key < arr[j]:
+                    arr[j + 1] = arr[j]
+                    j -= 1
+                    movimientos += 1
+                arr[j + 1] = key
+            return movimientos, consultas
+
+        movimientos, consultas = insercion(numeros)
+
+        lista_ordenada_insercion.config(text=f"Lista Ordenada: {numeros}")
+        lista_original_insercion.config(text=f"Lista Original: {entrada}")
+        info_insercion.config(text=f"Iteraciones: {len(numeros) - 1}, Movimientos: {movimientos}, Consultas: {consultas}")
+
+    boton_ordenar_insercion = tk.Button(tab_insercion, text="Ordenar", command=ordenar_insercion)
+    boton_ordenar_insercion.pack(pady=10)
+    boton_ordenar_insercion.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white")
+
+    botton_volver_insercion = tk.Button(tab_insercion, text="Volver", height=1, width=15)
+    botton_volver_insercion.pack(side="bottom", pady=10)
+    botton_volver_insercion.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
+
+    ################################################################## QUICKSORT ####################################################################################################
+
+    tab_quicksort = ttk.Frame(panel)
+    panel.add(tab_quicksort, text="Quicksort")
+
+    etiqueta_quicksort = tk.Label(tab_quicksort, text="Ingresa los números a ordenar separados por comas", font=("Arial", 16, "bold"))
+    etiqueta_quicksort.pack(pady=10)
+
+    entrada_quicksort = tk.Entry(tab_quicksort)
+    entrada_quicksort.pack(pady=20)
+    entrada_quicksort.config(font=("Arial", 12), borderwidth=2, relief="ridge", width=50, justify="center")
+
+    resultado_label_quicksort = ttk.Label(tab_quicksort, text="", font=("Arial", 12))
+    resultado_label_quicksort.pack(pady=10)
+
+    lista_ordenada_quicksort = ttk.Label(tab_quicksort, text="", font=("Arial", 12))
+    lista_ordenada_quicksort.pack(pady=10)
+
+    lista_original_quicksort = ttk.Label(tab_quicksort, text="", font=("Arial", 12))
+    lista_original_quicksort.pack(pady=10)
+
+    info_quicksort = ttk.Label(tab_quicksort, text="", font=("Arial", 12))
+    info_quicksort.pack(pady=10)
+
+
+
+
+    def ordenar_quicksort():
+        entrada = entrada_quicksort.get().strip()
+
+        if not entrada:
+            resultado_label_quicksort.config(text="Por favor, ingresa números separados por comas.")
+            return
+    
+        try:
+            # Dividir la entrada en una lista de números
+            numeros = [int(x) for x in entrada.split(',')]
+        except ValueError:
+            resultado_label_quicksort.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+    
+        def quicksort(arr, low, high):
+            if low < high:
+                start_time = time.time()  # Iniciar el temporizador
+                pi = particion(arr, low, high)
+                quicksort(arr, low, pi - 1)
+                quicksort(arr, pi + 1, high)
+                end_time = time.time()  # Detener el temporizador
+                return end_time - start_time  # Tiempo transcurrido
+    
+        def particion(arr, low, high):
+            i = low - 1
+            pivot = arr[high]
+            for j in range(low, high):
+                if arr[j] < pivot:
+                    i += 1
+                    arr[i], arr[j] = arr[j], arr[i]
+            arr[i + 1], arr[high] = arr[high], arr[i + 1]
+            return i + 1
+
+        tiempo_transcurrido = quicksort(numeros, 0, len(numeros) - 1)
+        resultado_label_quicksort.config(text=f"Tiempo de ejecución: {tiempo_transcurrido:.6f} segundos")
+        lista_ordenada_quicksort.config(text=f"Lista Ordenada: {numeros}")
+        lista_original_quicksort.config(text=f"Lista Original: {entrada}")
+
+    boton_ordenar_quicksort = tk.Button(tab_quicksort, text="Ordenar", command=ordenar_quicksort)
+    boton_ordenar_quicksort.pack(pady=10)
+    boton_ordenar_quicksort.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white")
+
+    botton_volver_quicksort = tk.Button(tab_quicksort, text="Volver", height=1, width=15)
+    botton_volver_quicksort.pack(side="bottom", pady=10)
+    botton_volver_quicksort.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
+
+    ################################################################## MERGESORT ####################################################################################################
+    tab_mergesort = ttk.Frame(panel)
+    panel.add(tab_mergesort, text="Mergesort")
+
+    etiqueta_mergesort = tk.Label(tab_mergesort, text="Ingresa los números a ordenar separados por comas", font=("Arial", 16, "bold"))
+    etiqueta_mergesort.pack(pady=10)
+
+    entrada_mergesort = tk.Entry(tab_mergesort)
+    entrada_mergesort.pack(pady=20)
+    entrada_mergesort.config(font=("Arial", 12), borderwidth=2, relief="ridge", width=50, justify="center")
+
+    resultado_label_mergesort = ttk.Label(tab_mergesort, text="", font=("Arial", 12))
+    resultado_label_mergesort.pack(pady=10)
+
+    lista_ordenada_mergesort = ttk.Label(tab_mergesort, text="", font=("Arial", 12))
+    lista_ordenada_mergesort.pack(pady=10)
+
+    lista_original_mergesort = ttk.Label(tab_mergesort, text="", font=("Arial", 12))
+    lista_original_mergesort.pack(pady=10)
+
+    info_mergesort = ttk.Label(tab_mergesort, text="", font=("Arial", 12))
+    info_mergesort.pack(pady=10)
+
+    def ordenar_mergesort():
+        entrada = entrada_mergesort.get().strip()
+
+        if not entrada:
+            resultado_label_mergesort.config(text="Por favor, ingresa números separados por comas.")
+            return
+        
+        try:
+            # Dividir la entrada en una lista de números
+            numeros = [int(x) for x in entrada.split(',')]
+        except ValueError:
+            resultado_label_mergesort.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+        
+        def mergesort(arr):
+            movimientos = 0
+            consultas = 0
+            if len(arr) > 1:
+                mid = len(arr) // 2
+                L = arr[:mid]
+                R = arr[mid:]
+                movimientos_izquierda, consultas_izquierda = mergesort(L)
+                movimientos_derecha, consultas_derecha = mergesort(R)
+                movimientos += movimientos_izquierda + movimientos_derecha
+                consultas += consultas_izquierda + consultas_derecha
+                i = j = k = 0
+                while i < len(L) and j < len(R):
+                    consultas += 1
+                    if L[i] < R[j]:
+                        arr[k] = L[i]
+                        i += 1
+                    else:
+                        arr[k] = R[j]
+                        j += 1
+                    k += 1
+                    movimientos += 1
+                while i < len(L):
+                    arr[k] = L[i]
+                    i += 1
+                    k += 1
+                    movimientos += 1
+                while j < len(R):
+                    arr[k] = R[j]
+                    j += 1
+                    k += 1
+                    movimientos += 1
+            return movimientos, consultas
+        
+        movimientos, consultas = mergesort(numeros)
+
+        lista_ordenada_mergesort.config(text=f"Lista Ordenada: {numeros}")
+        lista_original_mergesort.config(text=f"Lista Original: {entrada}")
+        info_mergesort.config(text=f"Iteraciones: {len(numeros) - 1}, Movimientos: {movimientos}, Consultas: {consultas}")
+
+    boton_ordenar_mergesort = tk.Button(tab_mergesort, text="Ordenar", command=ordenar_mergesort)
+    boton_ordenar_mergesort.pack(pady=10)
+    boton_ordenar_mergesort.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white")
+
+    botton_volver_mergesort = tk.Button(tab_mergesort, text="Volver", height=1, width=15)
+    botton_volver_mergesort.pack(side="bottom", pady=10)
+    botton_volver_mergesort.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
+
+
+
+
+
+        
+        
+
+
     
 # Función para cambiar la ventana a la ventana de registro
 def ventana_registro():
