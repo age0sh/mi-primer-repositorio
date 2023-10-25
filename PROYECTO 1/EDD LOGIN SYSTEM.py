@@ -313,6 +313,10 @@ def ventana_submenu():
     ordenamientos_button = tk.Button(ventana, text="Ordenamientos", height=3, width=15,command=ventana_ordenamientos)
     ordenamientos_button.pack(pady=20)
     ordenamientos_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+    
+    arboles_button = tk.Button(ventana, text="Árboles", height=3, width=15)
+    arboles_button.pack(pady=20)
+    arboles_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
 
     # Botón "Volver al Menú Principal" en la parte inferior
     volver_button = tk.Button(ventana, text="Volver",height=3,width=15,command=menu_principal)
@@ -536,14 +540,24 @@ def ventana_ordenamientos():
                         movimientos_pasada += 1
                 movimientos += movimientos_pasada
 
-            return movimientos, consultas
+                if not movimientos_pasada:
+                    break
 
-        movimientos, consultas = burbuja(numeros)
+            ordenada = True
+            for i in range(n - 1):
+                consultas += 1
+                if arr[i] > arr[i + 1]:
+                    ordenada = False
+                    break
+
+            return movimientos, consultas, ordenada
+
+        movimientos, consultas, ordenada = burbuja(numeros)
 
         # Actualizar las etiquetas existentes
         lista_ordenada.config(text=f"Lista Ordenada: {numeros}")
         lista_original.config(text=f"Lista Original: {entrada}")
-        info_burbuja.config(text=f"Iteraciones: {len(numeros) - 1}, Movimientos: {movimientos}, Consultas: {consultas}")
+        info_burbuja.config(text=f"Iteraciones: {len(numeros)}, Movimientos: {movimientos}, Consultas: {consultas}")
 
     boton_ordenar = tk.Button(tab_burbuja, text="Ordenar", command=ordenar_burbuja)
     boton_ordenar.pack(pady=10)
