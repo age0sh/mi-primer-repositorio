@@ -88,15 +88,19 @@ def guardar_datos():
         json.dump(respuestas_hogar, f)
 
 def fondo():
-    image = Image.open("CRUD GE0SH.png")
-    photo = ImageTk.PhotoImage(image)
+    try:
+        image = Image.open("CRUD GE0SH.png")
+        photo = ImageTk.PhotoImage(image)
 
-    # Establecer la imagen de fondo en una etiqueta
-    background_label = tk.Label(ventana, image=photo)
-    background_label.place(relwidth=1, relheight=1)
+        # Establecer la imagen de fondo en una etiqueta
+        background_label = tk.Label(ventana, image=photo)
+        background_label.place(relwidth=1, relheight=1)
 
-    # Asegúrate de mantener una referencia global a la imagen para evitar que sea eliminada por el recolector de basura
-    background_label.image = photo
+        # Asegúrate de mantener una referencia global a la imagen para evitar que sea eliminada por el recolector de basura
+        background_label.image = photo
+    except FileNotFoundError:
+        # Si el archivo de imagen no se encuentra, usa un color de fondo
+        ventana.configure(bg="#FFFFF3")
 
 def registrar():
     global ultimo_indice
@@ -933,6 +937,7 @@ def menu_principal():
 
     titulo = tk.Label(ventana, text="\nINICIAR SESIÓN", font=("Arial", 16, "bold"))
     titulo.pack()
+    titulo.config(bg="#fffff5",fg="#F4A50E")
 
     
     #fondo
