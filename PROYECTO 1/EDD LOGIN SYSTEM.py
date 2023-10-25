@@ -7,7 +7,7 @@ import os
 import time
 import json
 
-matriz_user = [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+matriz_user_in_code =[[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
@@ -18,7 +18,7 @@ matriz_user = [[" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "]]
 
-matriz_pass = [[" ", " ", " ", " ", " ", " ", " ", " "],
+matriz_pass_in_code = [[" ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " "],
@@ -113,7 +113,7 @@ def registrar():
         messagebox.showerror("Campos Vacíos", "Ingrese datos en todos los campos.")
         return
 
-    if usuario in ["".join(matriz_user[i]).strip() for i in range(ultimo_indice + 1)]:
+    if usuario in ["".join(matriz_user_in_code[i]).strip() for i in range(ultimo_indice + 1)]:
         messagebox.showerror("Usuario Existente", "El usuario ya existe. Intente con un nombre de usuario diferente.")
         return
 
@@ -128,9 +128,11 @@ def registrar():
     ultimo_indice += 1
 
     for j, caracter in enumerate(usuario):
-        matriz_user[ultimo_indice][j] = caracter
+        matriz_user_in_code[ultimo_indice][j] = caracter
+        matriz_user [ultimo_indice][j] = caracter
 
     for j, caracter in enumerate(contraseña):
+        matriz_pass_in_code[ultimo_indice][j] = caracter
         matriz_pass[ultimo_indice][j] = caracter
 
     if not respuesta_numero.isdigit():
@@ -147,6 +149,7 @@ def registrar():
     guardar_datos()
 
     messagebox.showinfo("Registro Exitoso", "Usuario registrado exitosamente")
+    menu_principal()
 
 # Función para iniciar sesión
 def login():
@@ -210,6 +213,15 @@ def eliminar_usuario():
                     # Actualizar el índice del último usuario registrado
                     ultimo_indice -= 1
 
+                    matriz_user_in_code.pop(i)
+                    matriz_pass_in_code.pop(i)
+
+                    for j in range(i, ultimo_indice + 1):
+                        matriz_user_in_code[j] = matriz_user_in_code[j + 1]
+                        matriz_pass_in_code[j] = matriz_pass_in_code[j + 1]
+
+                    matriz_user_in_code.append([" "] * 10)
+                    matriz_pass_in_code.append([" "] * 8)
                     guardar_datos()  # Actualizar los archivos JSON
 
                     ventana_datos()  # Llama a una función para actualizar la ventana de datos
@@ -233,7 +245,7 @@ def actualizar_usuario():
         messagebox.showerror("Campos Vacíos", "Por favor, complete al menos un campo para actualizar.")
         return
     usuario_encontrado = False
-
+# Buscar el usuario en la matriz de usuarios
     for i in range(ultimo_indice + 1):
         if "".join(matriz_user[i]).strip() == usuario:
             usuario_encontrado = True
@@ -245,6 +257,7 @@ def actualizar_usuario():
                     messagebox.showerror("Contraseña Incorrecta", "La contraseña debe tener 8 caracteres exactos, incluyendo al menos 1 mayúscula, 1 símbolo y 1 número")
                     return
                 matriz_pass[i] = list(nueva_contraseña)
+                matriz_pass_in_code[i] = list(nueva_contraseña)
 
             if nuevo_numero:
                 if not nuevo_numero.isdigit():
@@ -265,6 +278,23 @@ def actualizar_usuario():
 
     if not usuario_encontrado:
         messagebox.showerror("Error", "Usuario no encontrado.")
+
+def cargar_datos_desde_json():
+    global matriz_user_in_code, matriz_pass_in_code
+    try:
+        with open("matriz_user.json", "r") as f:
+            matriz_user_in_code = json.load(f)
+    except FileNotFoundError:
+        matriz_user_in_code = [[" "] * 10 for _ in range(10)]
+
+    try:
+        with open("matriz_pass.json", "r") as f:
+            matriz_pass_in_code = json.load(f)
+    except FileNotFoundError:
+        matriz_pass_in_code = [[" "] * 8 for _ in range(10)]
+
+    # Luego, actualiza la ventana de datos para reflejar los nuevos datos
+    ventana_datos()
 
 def ventana_submenu():
     for widget in ventana.winfo_children():
@@ -295,7 +325,7 @@ def ventana_datos():
     for widget in ventana.winfo_children():
         widget.destroy()
 
-    ventana.geometry("800x500")
+    ventana.geometry("685x500")
 
     # Crear un Frame principal que llenará toda la ventana
     frame_principal = tk.Frame(ventana)
@@ -316,33 +346,35 @@ def ventana_datos():
     frame_info.pack(side="bottom", expand=True, fill='both', pady=10)
     frame_info.config(bg="#FFFFF3")
 
-    # Configurar las columnas para que se expandan uniformemente
-    for i in range(4):
-        frame_info.grid_columnconfigure(i, weight=1, minsize=200)  # Ancho mínimo de 200 para cada columna
-
-    # Crear etiquetas para los encabezados de las columnas con bordes negros
-    encabezados = ["Usuario", "Contraseña", "Número Favorito", "Lugar de Nacimiento"]
-    for i in range(4):
-        cell_border = tk.Frame(frame_info, borderwidth=1, relief="solid")
-        cell_border.grid(row=0, column=i, sticky="nsew")
-        tk.Label(cell_border, text=encabezados[i], font=("bold", 10), bg="#FFFFF3", fg="black").pack(fill='x')
-
-    # Obtener la información de los registros y mostrarla en las columnas con bordes negros y colores personalizados
+    # Mostrar la matriz de usuario
     for i in range(ultimo_indice + 1):
-        for j in range(4):
-            cell_border = tk.Frame(frame_info, borderwidth=1, relief="solid")
-            cell_border.grid(row=i + 1, column=j, sticky="nsew")
+        for j in range(10):
+            cuadro_texto = tk.Text(frame_info, height=1, width=2)
+            cuadro_texto.grid(row=i, column=j)
+            cuadro_texto.insert(tk.END, matriz_user_in_code[i][j])
+            cuadro_texto.config(state=tk.DISABLED)
 
-            if j == 0:
-                tk.Label(cell_border, text="".join(matriz_user[i]).strip(), bg="#FFFFF3").pack(fill='x')
-            elif j == 1:
-                tk.Label(cell_border, text="".join(matriz_pass[i]).strip(), bg="#FFFFF3").pack(fill='x')
-            elif j == 2:
-                if i < len(respuestas_numero):
-                    tk.Label(cell_border, text=", ".join(respuestas_numero[i]), bg="#FFFFF3").pack(fill='x')
-            elif j == 3:
-                if i < len(respuestas_hogar):
-                    tk.Label(cell_border, text=", ".join(respuestas_hogar[i]), bg="#FFFFF3").pack(fill='x')
+    # Mostrar la matriz de contraseña
+    for i in range(ultimo_indice + 1):
+        for j in range(8):
+            cuadro_texto = tk.Text(frame_info, height=1, width=2)
+            cuadro_texto.grid(row=i, column=j + 11)  # Separar las matrices
+            cuadro_texto.insert(tk.END, matriz_pass_in_code[i][j])
+            cuadro_texto.config(state=tk.DISABLED)
+
+    # Mostrar la información de las respuestas
+    for i in range(ultimo_indice + 1):
+        if i < len(respuestas_numero):
+            cuadro_texto = tk.Text(frame_info, height=1, width=20)
+            cuadro_texto.grid(row=i, column=21)  # Separar las matrices
+            cuadro_texto.insert(tk.END, ", ".join(respuestas_numero[i]))
+            cuadro_texto.config(state=tk.DISABLED)
+
+        if i < len(respuestas_hogar):
+            cuadro_texto = tk.Text(frame_info, height=1, width=20)
+            cuadro_texto.grid(row=i, column=22)  # Separar las matrices
+            cuadro_texto.insert(tk.END, ", ".join(respuestas_hogar[i]))
+            cuadro_texto.config(state=tk.DISABLED)
 
     # Botones
     botton_eliminar_usuario = tk.Button(frame_botones, text="Eliminar Usuario", height=1, width=15)
@@ -353,10 +385,13 @@ def ventana_datos():
     botton_actualizar_usuario.pack(side="left", pady=10, padx=10)
     botton_actualizar_usuario.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white")
 
+    botton_cargar_datos = tk.Button(frame_botones, text="Cargar Datos", height=1, width=15,command=cargar_datos_desde_json)
+    botton_cargar_datos.pack(side="left", pady=10, padx=10)
+    botton_cargar_datos.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white")
+
     botton_volver = tk.Button(frame_botones, text="Volver", height=1, width=15)
     botton_volver.pack(side="left", pady=10, padx=10)
     botton_volver.config(font=("Arial", 12, "bold"), borderwidth=2, relief="ridge", bg="#151918", fg="white", command=ventana_submenu)
-
 
 def ventana_eliminar():
     global username_entry, numero_entry, hogar_entry
@@ -488,24 +523,22 @@ def ventana_ordenamientos():
             resultado_label.config(text="Error: Ingresa números válidos separados por comas.")
             return
 
-        # Función de ordenamiento de burbuja
         def burbuja(arr):
             n = len(arr)
-            consultas = 0
             movimientos = 0
-            iteraciones = 0
-
-            for i in range(n):
-                for j in range(0, n - i - 1):
-                    iteraciones += 1
+            consultas = 0
+            for i in range(n - 1):
+                movimientos_pasada = 0  # Contador de movimientos en la pasada actual
+                for j in range(n - 1):
+                    consultas += 1
                     if arr[j] > arr[j + 1]:
-                        consultas += 1
                         arr[j], arr[j + 1] = arr[j + 1], arr[j]
-                        movimientos += 1
+                        movimientos_pasada += 1
+                movimientos += movimientos_pasada
 
-            return movimientos, consultas, iteraciones
+            return movimientos, consultas
 
-        iteraciones, movimientos, consultas = burbuja(numeros)
+        movimientos, consultas = burbuja(numeros)
 
         # Actualizar las etiquetas existentes
         lista_ordenada.config(text=f"Lista Ordenada: {numeros}")
@@ -890,7 +923,7 @@ def menu_principal():
     
     #fondo
     fondo()
-
+    
     
     # Etiquetas y campos de entrada en la ventana de inicio de sesión
     username_label = tk.Label(ventana, text="Usuario:")
