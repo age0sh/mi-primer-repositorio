@@ -326,27 +326,77 @@ def eliminarusuario():
 
 
 # Función para realizar ordenamientos
+def burbuja(arr):
+    n = len(arr)
+    movimientos = 0
+    consultas = 0
+    for i in range(n - 1):
+        movimientos_pasada = 0  # Contador de movimientos en la pasada actual
+        for j in range(n - 1):
+            consultas += 1
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                movimientos_pasada += 1
+        movimientos += movimientos_pasada
+
+        if not movimientos_pasada:
+            break
+
+    ordenada = True
+    for i in range(n - 1):
+        consultas += 1
+        if arr[i] > arr[i + 1]:
+            ordenada = False
+            break
+
+    return movimientos, consultas, ordenada
+
+# Función para ordenamiento burbuja mejorada
+def burbuja_mejorada(arr):
+    n = len(arr)
+    movimientos = 0
+    consultas = 0
+    for i in range(n - 1):
+        swapped = False
+        movimientos_pasada = 0  # Contador de movimientos en la pasada actual
+        for j in range(0, n - i - 1):
+            consultas += 1
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                movimientos_pasada += 1
+                swapped = True
+        movimientos += movimientos_pasada
+        if not swapped:
+            break
+    return movimientos, consultas
+
 def ordenamientos():
     print("Elige uno de los siguientes ordenamientos")
     print("1. Burbuja")
     print("2. Burbuja mejorada")
-    print("3. Volver al menu anterior")
+    print("3. Volver al menú anterior")
 
     opcion = input("Ingrese una opción: ")
     if opcion == "1":
         limpiar_pantalla()
-        burbuja()
+        numeros = input("Ingrese la lista de números separados por comas: ")
+        numeros = [int(x) for x in numeros.split(",")]
+
+        movimientos, consultas, ordenada = burbuja(numeros)
+        print("Lista ordenada:", numeros)
+        print(f"Número de movimientos realizados: {movimientos}")
+        print(f"Número de comparaciones realizadas: {consultas}")
+        input("presione cualquier tecla para continuar")
     elif opcion == "2":
         limpiar_pantalla()
-        burbuja_mejorada()
-    elif opcion == "3":
-        return  
-    else:
-        print("Opción inválida")
+        numeros = input("Ingrese la lista de números separados por comas: ")
+        numeros = [int(x) for x in numeros.split(",")]
 
-
-# Función para ordenamiento burbuja
-
+        movimientos, consultas = burbuja_mejorada(numeros)
+        print("Lista ordenada:", numeros)
+        print(f"Número de movimientos realizados: {movimientos}")
+        print(f"Número de comparaciones realizadas: {consultas}")
+        input("presione cualquier tecla para continuar")
 
 #funcion para ordenamiento burbuja mejorada
 
