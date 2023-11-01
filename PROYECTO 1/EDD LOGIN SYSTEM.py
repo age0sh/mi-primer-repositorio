@@ -29,8 +29,8 @@ matriz_pass_in_code = [[" ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " "],
                [" ", " ", " ", " ", " ", " ", " ", " "]]
 
-respuestas_hogar = [[] for _ in range(10)]
-respuestas_numero = [[] for _ in range(10)]
+respuestas_hogar_in_code = [[] for _ in range(10)]
+respuestas_numero_in_code = [[] for _ in range(10)]
 
 ultimo_indice = -1
 username_entry = None
@@ -148,6 +148,8 @@ def registrar():
         ultimo_indice -= 1
         return
 
+    respuestas_hogar_in_code[ultimo_indice].append(respuesta_hogar)
+    respuestas_numero_in_code[ultimo_indice].append(respuesta_numero)
     respuestas_numero[ultimo_indice].append(respuesta_numero)
     respuestas_hogar[ultimo_indice].append(respuesta_hogar)
     guardar_datos()
@@ -175,64 +177,62 @@ def login():
 def eliminar_usuario():
     global username_entry, numero_entry, hogar_entry
     global matriz_user, matriz_pass, respuestas_numero, respuestas_hogar, ultimo_indice
+    global matriz_user_in_code, matriz_pass_in_code, respuestas_numero_in_code, respuestas_hogar_in_code
 
     usuario = username_entry.get()
-    respuesta_numero = numero_entry.get()
-    respuesta_hogar = hogar_entry.get()
 
-    usuario_encontrado = False  # Variable para rastrear si el usuario se encontró
+    usuario_encontrado = False
     for i in range(ultimo_indice + 1):
         if "".join(matriz_user[i]).strip() == usuario:
             usuario_encontrado = True
 
-            # Validar las respuestas de seguridad
-            if i < len(respuestas_numero) and i < len(respuestas_hogar):
-                respuestas_num_guardadas = respuestas_numero[i]
-                respuestas_hogar_guardadas = respuestas_hogar[i]
+            # Simplemente reemplaza el contenido del usuario con espacios en blanco en ambas representaciones
+            matriz_user[i] = [" "] * 10
+            matriz_pass[i] = [" "] * 8
+            respuestas_numero[i] = []
+            respuestas_hogar[i] = []
 
-                if respuesta_numero in respuestas_num_guardadas and respuesta_hogar in respuestas_hogar_guardadas:
-                    # Marcar el usuario y la contraseña como espacios en blanco
-                    matriz_user[i] = [" "] * 10
-                    matriz_pass[i] = [" "] * 8
+            matriz_user_in_code[i] = [" "] * 10
+            matriz_pass_in_code[i] = [" "] * 8
+            respuestas_numero_in_code[i] = []
+            respuestas_hogar_in_code[i] = []
 
-                    # Eliminar las respuestas de seguridad del usuario
-                    respuestas_numero[i] = []
-                    respuestas_hogar[i] = []
+            guardar_datos()  # Actualiza los archivos JSON
+            ventana_datos()  # Actualiza la interfaz gráfica
 
-                    # Compactar la matriz y las listas
+            # Compacta los datos
+            i = 0
+            while i <= ultimo_indice:
+                if "".join(matriz_user[i]).strip() == "":
                     for j in range(i, ultimo_indice):
                         matriz_user[j] = matriz_user[j + 1]
                         matriz_pass[j] = matriz_pass[j + 1]
                         respuestas_numero[j] = respuestas_numero[j + 1]
                         respuestas_hogar[j] = respuestas_hogar[j + 1]
 
-                    # Marcar la última entrada en la matriz como espacios en blanco
+                        matriz_user_in_code[j] = matriz_user_in_code[j + 1]
+                        matriz_pass_in_code[j] = matriz_pass_in_code[j + 1]
+                        respuestas_numero_in_code[j] = respuestas_numero_in_code[j + 1]
+                        respuestas_hogar_in_code[j] = respuestas_hogar_in_code[j + 1]
+
                     matriz_user[ultimo_indice] = [" "] * 10
                     matriz_pass[ultimo_indice] = [" "] * 8
-
-                    # Eliminar las respuestas de seguridad de la última entrada
                     respuestas_numero[ultimo_indice] = []
                     respuestas_hogar[ultimo_indice] = []
 
-                    # Actualizar el índice del último usuario registrado
+                    matriz_user_in_code[ultimo_indice] = [" "] * 10
+                    matriz_pass_in_code[ultimo_indice] = [" "] * 8
+                    respuestas_numero_in_code[ultimo_indice] = []
+                    respuestas_hogar_in_code[ultimo_indice] = []
+
                     ultimo_indice -= 1
 
-                    matriz_user_in_code.pop(i)
-                    matriz_pass_in_code.pop(i)
+                i += 1
 
-                    for j in range(i, ultimo_indice + 1):
-                        matriz_user_in_code[j] = matriz_user_in_code[j + 1]
-                        matriz_pass_in_code[j] = matriz_pass_in_code[j + 1]
-
-                    matriz_user_in_code.append([" "] * 10)
-                    matriz_pass_in_code.append([" "] * 8)
-                    guardar_datos()  # Actualizar los archivos JSON
-
-                    ventana_datos()  # Llama a una función para actualizar la ventana de datos
-                    messagebox.showinfo("Usuario Eliminado", "Usuario eliminado exitosamente")
-                else:
-                    messagebox.showerror("Respuestas Incorrectas", "Las respuestas de seguridad no coinciden.")
-                break  # Salir del bucle cuando se encuentra el usuario
+            guardar_datos()  # Vuelve a guardar los archivos JSON después de la compactación
+            ventana_datos()  # Actualiza la interfaz gráfica
+            messagebox.showinfo("Usuario Eliminado", "Contenido del usuario eliminado exitosamente")
+            break
 
     if not usuario_encontrado:
         messagebox.showerror("Error", "Usuario no encontrado.")
@@ -268,12 +268,14 @@ def actualizar_usuario():
                     messagebox.showerror("Número Incorrecto", "El número debe ser un número válido.")
                     return
                 respuestas_numero[i] = [nuevo_numero]
+                respuestas_numero_in_code[i] = [nuevo_numero]
 
             if nuevo_hogar:
                 if not nuevo_hogar.isalpha():
                     messagebox.showerror("Lugar de Nacimiento Incorrecto", "El lugar de nacimiento debe contener solo letras.")
                     return
                 respuestas_hogar[i] = [nuevo_hogar]
+                respuestas_hogar_in_code[i] = [nuevo_hogar]
 
             guardar_datos()
             ventana_datos()
@@ -284,7 +286,7 @@ def actualizar_usuario():
         messagebox.showerror("Error", "Usuario no encontrado.")
 
 def cargar_datos_desde_json():
-    global matriz_user_in_code, matriz_pass_in_code
+    global matriz_user_in_code, matriz_pass_in_code, respuestas_numero_in_code, respuestas_hogar_in_code
     try:
         with open("matriz_user.json", "r") as f:
             matriz_user_in_code = json.load(f)
@@ -296,6 +298,18 @@ def cargar_datos_desde_json():
             matriz_pass_in_code = json.load(f)
     except FileNotFoundError:
         matriz_pass_in_code = [[" "] * 8 for _ in range(10)]
+
+    try:
+        with open("respuestas_numero.json", "r") as f:
+            respuestas_numero_in_code = json.load(f)
+    except FileNotFoundError:
+        respuestas_numero_in_code = [[] for _ in range(10)]
+
+    try:
+        with open("respuestas_hogar.json", "r") as f:
+            respuestas_hogar_in_code = json.load(f)
+    except FileNotFoundError:
+        respuestas_hogar_in_code = [[] for _ in range(10)]
 
     # Luego, actualiza la ventana de datos para reflejar los nuevos datos
     ventana_datos()
@@ -375,13 +389,13 @@ def ventana_datos():
         if i < len(respuestas_numero):
             cuadro_texto = tk.Text(frame_info, height=1, width=20)
             cuadro_texto.grid(row=i, column=21)  # Separar las matrices
-            cuadro_texto.insert(tk.END, ", ".join(respuestas_numero[i]))
+            cuadro_texto.insert(tk.END, ", ".join(respuestas_numero_in_code[i]))
             cuadro_texto.config(state=tk.DISABLED)
 
         if i < len(respuestas_hogar):
             cuadro_texto = tk.Text(frame_info, height=1, width=20)
             cuadro_texto.grid(row=i, column=22)  # Separar las matrices
-            cuadro_texto.insert(tk.END, ", ".join(respuestas_hogar[i]))
+            cuadro_texto.insert(tk.END, ", ".join(respuestas_hogar_in_code[i]))
             cuadro_texto.config(state=tk.DISABLED)
 
     # Botones
@@ -519,6 +533,7 @@ def ventana_ordenamientos():
     def ordenar_burbuja():
         # Obtener la entrada del usuario
         entrada = entrada_burbuja.get().strip()
+        resultado_label.config(text="")
         
         if not entrada:
             resultado_label.config(text="Por favor, ingresa números separados por comas.")
@@ -530,33 +545,29 @@ def ventana_ordenamientos():
         except ValueError:
             resultado_label.config(text="Error: Ingresa números válidos separados por comas.")
             return
-
-        def burbuja(arr):
-            n = len(arr)
+        
+        # Verificar si la entrada contiene más de 10 números
+        if len(numeros) > 10:
+            resultado_label.config(text="Error: No se permiten más de 10 números.")
+            return
+        
+        # Verificar si la entrada contiene menos de 5 números
+        if len(numeros) < 5:
+            resultado_label.config(text="Error: Se requieren al menos 5 números.")
+            return
+        
+        def burbuja():
             movimientos = 0
             consultas = 0
-            for i in range(n - 1):
-                movimientos_pasada = 0  # Contador de movimientos en la pasada actual
-                for j in range(n - 1):
+            for i in range(len(numeros)):
+                for j in range(len(numeros) - 1):
                     consultas += 1
-                    if arr[j] > arr[j + 1]:
-                        arr[j], arr[j + 1] = arr[j + 1], arr[j]
-                        movimientos_pasada += 1
-                movimientos += movimientos_pasada
-
-                if not movimientos_pasada:
-                    break
-
-            ordenada = True
-            for i in range(n - 1):
-                consultas += 1
-                if arr[i] > arr[i + 1]:
-                    ordenada = False
-                    break
-
-            return movimientos, consultas, ordenada
-
-        movimientos, consultas, ordenada = burbuja(numeros)
+                    if numeros[j] > numeros[j + 1]:
+                        numeros[j], numeros[j + 1] = numeros[j + 1], numeros[j]
+                        movimientos += 1
+            return movimientos, consultas
+        
+        movimientos, consultas = burbuja()
 
         # Actualizar las etiquetas existentes
         lista_ordenada.config(text=f"Lista Ordenada: {numeros}")
@@ -596,6 +607,7 @@ def ventana_ordenamientos():
 
     def ordenar_burbuja_mejorada():
         entrada = entrada_burbuja_mejorada.get().strip()
+        resultado_label_mejorada.config(text="")
         
         if not entrada:
             resultado_label_mejorada.config(text="Por favor, ingresa números separados por comas.")
@@ -606,6 +618,16 @@ def ventana_ordenamientos():
             numeros = [int(x) for x in entrada.split(',')]
         except ValueError:
             resultado_label_mejorada.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+        
+        # Verificar si la entrada contiene más de 10 números
+        if len(numeros) > 10:
+            resultado_label_mejorada.config(text="Error: No se permiten más de 10 números.")
+            return
+        
+        # Verificar si la entrada contiene menos de 5 números
+        if len(numeros) < 5:
+            resultado_label_mejorada.config(text="Error: Se requieren al menos 5 números.")
             return
         
         def burbuja_mejorada(arr):
@@ -643,7 +665,7 @@ def ventana_ordenamientos():
 ################################################################## INSERCIÓN ####################################################################################################
 
     tab_insercion = ttk.Frame(panel)
-    panel.add(tab_insercion, text="Inserción")
+    panel.add(tab_insercion, text="Insertion Sort")
 
     etiqueta_insercion = tk.Label(tab_insercion, text="Ingresa los números a ordenar separados por comas", font=("Arial", 16, "bold"))
     etiqueta_insercion.pack(pady=10)
@@ -666,6 +688,7 @@ def ventana_ordenamientos():
 
     def ordenar_insercion():
         entrada = entrada_insercion.get().strip()
+        resultado_label_insercion.config(text="")
         
         if not entrada:
             resultado_label_insercion.config(text="Por favor, ingresa números separados por comas.")
@@ -676,6 +699,16 @@ def ventana_ordenamientos():
             numeros = [int(x) for x in entrada.split(',')]
         except ValueError:
             resultado_label_insercion.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+        
+        # Verificar si la entrada contiene más de 10 números
+        if len(numeros) > 10:
+            resultado_label_insercion.config(text="Error: No se permiten más de 10 números.")
+            return
+        
+        # Verificar si la entrada contiene menos de 5 números
+        if len(numeros) < 5:
+            resultado_label_insercion.config(text="Error: Se requieren al menos 5 números.")
             return
         
         def insercion(arr):
@@ -709,7 +742,7 @@ def ventana_ordenamientos():
     ################################################################## QUICKSORT ####################################################################################################
 
     tab_quicksort = ttk.Frame(panel)
-    panel.add(tab_quicksort, text="Quicksort")
+    panel.add(tab_quicksort, text="Quick Sort")
 
     etiqueta_quicksort = tk.Label(tab_quicksort, text="Ingresa los números a ordenar separados por comas", font=("Arial", 16, "bold"))
     etiqueta_quicksort.pack(pady=10)
@@ -735,16 +768,27 @@ def ventana_ordenamientos():
 
     def ordenar_quicksort():
         entrada = entrada_quicksort.get().strip()
+        resultado_label_quicksort.config(text="")
 
         if not entrada:
             resultado_label_quicksort.config(text="Por favor, ingresa números separados por comas.")
             return
-    
+
         try:
             # Dividir la entrada en una lista de números
             numeros = [int(x) for x in entrada.split(',')]
         except ValueError:
             resultado_label_quicksort.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+ 
+        # Verificar si la entrada contiene más de 10 números
+        if len(numeros) > 10:
+            resultado_label_quicksort.config(text="Error: No se permiten más de 10 números.")
+            return
+        
+        # Verificar si la entrada contiene menos de 5 números
+        if len(numeros) < 5:
+            resultado_label_quicksort.config(text="Error: Se requieren al menos 5 números.")
             return
     
         def quicksort(arr, low, high):
@@ -781,7 +825,7 @@ def ventana_ordenamientos():
 
     ################################################################## MERGESORT ####################################################################################################
     tab_mergesort = ttk.Frame(panel)
-    panel.add(tab_mergesort, text="Mergesort")
+    panel.add(tab_mergesort, text="Merge Sort")
 
     etiqueta_mergesort = tk.Label(tab_mergesort, text="Ingresa los números a ordenar separados por comas", font=("Arial", 16, "bold"))
     etiqueta_mergesort.pack(pady=10)
@@ -804,16 +848,32 @@ def ventana_ordenamientos():
 
     def ordenar_mergesort():
         entrada = entrada_mergesort.get().strip()
+        resultado_label_mergesort.config(text="")
 
         if not entrada:
             resultado_label_mergesort.config(text="Por favor, ingresa números separados por comas.")
             return
-        
+
         try:
             # Dividir la entrada en una lista de números
             numeros = [int(x) for x in entrada.split(',')]
         except ValueError:
             resultado_label_mergesort.config(text="Error: Ingresa números válidos separados por comas.")
+            return
+        
+        # Verificar si la entrada contiene números repetidos
+        if len(numeros) != len(set(numeros)):
+            resultado_label_mergesort.config(text="Error: No se permiten números repetidos.")
+            return
+
+        # Verificar si la entrada contiene más de 10 números
+        if len(numeros) > 10:
+            resultado_label_mergesort.config(text="Error: No se permiten más de 10 números.")
+            return
+        
+        # Verificar si la entrada contiene menos de 5 números
+        if len(numeros) < 5:
+            resultado_label_mergesort.config(text="Error: Se requieren al menos 5 números.")
             return
         
         def mergesort(arr):
