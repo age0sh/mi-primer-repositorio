@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter import *
-#from PIL import Image, ImageTk 
+from PIL import Image, ImageTk 
 import os
 import time
 import json
