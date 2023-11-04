@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter import *
-from PIL import Image, ImageTk 
+#from PIL import Image, ImageTk 
 import os
 import time
 import json
@@ -38,30 +38,31 @@ password_entry = None
 numero_entry = None
 hogar_entry = None
 
+carpeta_datos = "DATOS"
 # Función para cargar datos desde archivos JSON
 def cargar_datos():
     global matriz_user, matriz_pass, respuestas_numero, respuestas_hogar, ultimo_indice
 
     try:
-        with open("matriz_user.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "matriz_user.json"), "r") as f:
             matriz_user = json.load(f)
     except FileNotFoundError:
         matriz_user = [[" "] * 10 for _ in range(10)]
 
     try:
-        with open("matriz_pass.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "matriz_pass.json"), "r") as f:
             matriz_pass = json.load(f)
     except FileNotFoundError:
         matriz_pass = [[" "] * 8 for _ in range(10)]
 
     try:
-        with open("respuestas_numero.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "respuestas_numero.json"), "r") as f:
             respuestas_numero = json.load(f)
     except FileNotFoundError:
         respuestas_numero = [[] for _ in range(10)]
 
     try:
-        with open("respuestas_hogar.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "respuestas_hogar.json"), "r") as f:
             respuestas_hogar = json.load(f)
     except FileNotFoundError:
         respuestas_hogar = [[] for _ in range(10)]
@@ -75,30 +76,32 @@ def cargar_datos():
 
 # Función para guardar datos en archivos JSON
 def guardar_datos():
-    with open("matriz_user.json", "w") as f:
+    os.makedirs(carpeta_datos, exist_ok=True)  # Crea la carpeta si no existe
+
+    with open(os.path.join(carpeta_datos, "matriz_user.json"), "w") as f:
         json.dump(matriz_user, f)
 
-    with open("matriz_pass.json", "w") as f:
+    with open(os.path.join(carpeta_datos, "matriz_pass.json"), "w") as f:
         json.dump(matriz_pass, f)
 
-    with open("respuestas_numero.json", "w") as f:
+    with open(os.path.join(carpeta_datos, "respuestas_numero.json"), "w") as f:
         json.dump(respuestas_numero, f)
 
-    with open("respuestas_hogar.json", "w") as f:
+    with open(os.path.join(carpeta_datos, "respuestas_hogar.json"), "w") as f:
         json.dump(respuestas_hogar, f)
 
 def fondo():
-    try:
-        image = Image.open("CRUD GE0SH.png")
-        photo = ImageTk.PhotoImage(image)
+    #try:
+        #image = Image.open("CRUD GE0SH.png")
+        #photo = ImageTk.PhotoImage(image)
 
         # Establecer la imagen de fondo en una etiqueta
-        background_label = tk.Label(ventana, image=photo)
-        background_label.place(relwidth=1, relheight=1)
+        #background_label = tk.Label(ventana, image=photo)
+        #background_label.place(relwidth=1, relheight=1)
 
         # Asegúrate de mantener una referencia global a la imagen para evitar que sea eliminada por el recolector de basura
-        background_label.image = photo
-    except FileNotFoundError:
+        #background_label.image = photo
+    #except FileNotFoundError:
         # Si el archivo de imagen no se encuentra, usa un color de fondo
         ventana.configure(bg="#FFFFF3")
 
@@ -288,25 +291,25 @@ def actualizar_usuario():
 def cargar_datos_desde_json():
     global matriz_user_in_code, matriz_pass_in_code, respuestas_numero_in_code, respuestas_hogar_in_code
     try:
-        with open("matriz_user.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "matriz_user.json"), "r") as f:
             matriz_user_in_code = json.load(f)
     except FileNotFoundError:
         matriz_user_in_code = [[" "] * 10 for _ in range(10)]
 
     try:
-        with open("matriz_pass.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "matriz_pass.json"), "r") as f:
             matriz_pass_in_code = json.load(f)
     except FileNotFoundError:
         matriz_pass_in_code = [[" "] * 8 for _ in range(10)]
 
     try:
-        with open("respuestas_numero.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "respuestas_numero.json"), "r") as f:
             respuestas_numero_in_code = json.load(f)
     except FileNotFoundError:
         respuestas_numero_in_code = [[] for _ in range(10)]
 
     try:
-        with open("respuestas_hogar.json", "r") as f:
+        with open(os.path.join(carpeta_datos, "respuestas_hogar.json"), "r") as f:
             respuestas_hogar_in_code = json.load(f)
     except FileNotFoundError:
         respuestas_hogar_in_code = [[] for _ in range(10)]
