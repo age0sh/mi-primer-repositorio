@@ -37,8 +37,9 @@ username_entry = None
 password_entry = None
 numero_entry = None
 hogar_entry = None
-
+canvas = None
 carpeta_datos = "DATOS"
+
 # Función para cargar datos desde archivos JSON
 def cargar_datos():
     global matriz_user, matriz_pass, respuestas_numero, respuestas_hogar, ultimo_indice
@@ -90,18 +91,48 @@ def guardar_datos():
     with open(os.path.join(carpeta_datos, "respuestas_hogar.json"), "w") as f:
         json.dump(respuestas_hogar, f)
 
+################################################################## cargar_datos_desde_json ####################################################################################################
+def cargar_datos_desde_json():
+    global matriz_user_in_code, matriz_pass_in_code, respuestas_numero_in_code, respuestas_hogar_in_code
+    try:
+        with open(os.path.join(carpeta_datos, "matriz_user.json"), "r") as f:
+            matriz_user_in_code = json.load(f)
+    except FileNotFoundError:
+        matriz_user_in_code = [[" "] * 10 for _ in range(10)]
+
+    try:
+        with open(os.path.join(carpeta_datos, "matriz_pass.json"), "r") as f:
+            matriz_pass_in_code = json.load(f)
+    except FileNotFoundError:
+        matriz_pass_in_code = [[" "] * 8 for _ in range(10)]
+
+    try:
+        with open(os.path.join(carpeta_datos, "respuestas_numero.json"), "r") as f:
+            respuestas_numero_in_code = json.load(f)
+    except FileNotFoundError:
+        respuestas_numero_in_code = [[] for _ in range(10)]
+
+    try:
+        with open(os.path.join(carpeta_datos, "respuestas_hogar.json"), "r") as f:
+            respuestas_hogar_in_code = json.load(f)
+    except FileNotFoundError:
+        respuestas_hogar_in_code = [[] for _ in range(10)]
+
+    # Luego, actualiza la ventana de datos para reflejar los nuevos datos
+    ventana_datos()
+
 def fondo():
-    #try:
-        #image = Image.open("CRUD GE0SH.png")
-        #photo = ImageTk.PhotoImage(image)
+    try:
+        image = Image.open("CRUD GE0SH.png")
+        photo = ImageTk.PhotoImage(image)
 
         # Establecer la imagen de fondo en una etiqueta
-        #background_label = tk.Label(ventana, image=photo)
-        #background_label.place(relwidth=1, relheight=1)
+        background_label = tk.Label(ventana, image=photo)
+        background_label.place(relwidth=1, relheight=1)
 
         # Asegúrate de mantener una referencia global a la imagen para evitar que sea eliminada por el recolector de basura
-        #background_label.image = photo
-    #except FileNotFoundError:
+        background_label.image = photo
+    except FileNotFoundError:
         # Si el archivo de imagen no se encuentra, usa un color de fondo
         ventana.configure(bg="#FFFFF3")
 
@@ -183,58 +214,57 @@ def eliminar_usuario():
     global matriz_user_in_code, matriz_pass_in_code, respuestas_numero_in_code, respuestas_hogar_in_code
 
     usuario = username_entry.get()
+    numero = numero_entry.get()
+    hogar = hogar_entry.get()
 
     usuario_encontrado = False
     for i in range(ultimo_indice + 1):
         if "".join(matriz_user[i]).strip() == usuario:
             usuario_encontrado = True
+            if numero in respuestas_numero[i] and hogar in respuestas_hogar[i]:
+                matriz_user[i] = [" "] * 10
+                matriz_pass[i] = [" "] * 8
+                respuestas_numero[i] = []
+                respuestas_hogar[i] = []
 
-            # Simplemente reemplaza el contenido del usuario con espacios en blanco en ambas representaciones
-            matriz_user[i] = [" "] * 10
-            matriz_pass[i] = [" "] * 8
-            respuestas_numero[i] = []
-            respuestas_hogar[i] = []
+                matriz_user_in_code[i] = [" "] * 10
+                matriz_pass_in_code[i] = [" "] * 8
+                respuestas_numero_in_code[i] = []
+                respuestas_hogar_in_code[i] = []
 
-            matriz_user_in_code[i] = [" "] * 10
-            matriz_pass_in_code[i] = [" "] * 8
-            respuestas_numero_in_code[i] = []
-            respuestas_hogar_in_code[i] = []
+                i = 0
+                while i < ultimo_indice:
+                    if "".join(matriz_user[i]).strip() == "":
+                        for j in range(i, ultimo_indice):
+                            matriz_user[j] = matriz_user[j + 1]
+                            matriz_pass[j] = matriz_pass[j + 1]
+                            respuestas_numero[j] = respuestas_numero[j + 1]
+                            respuestas_hogar[j] = respuestas_hogar[j + 1]
 
-            guardar_datos()  # Actualiza los archivos JSON
-            ventana_datos()  # Actualiza la interfaz gráfica
+                            matriz_user_in_code[j] = matriz_user_in_code[j + 1]
+                            matriz_pass_in_code[j] = matriz_pass_in_code[j + 1]
+                            respuestas_numero_in_code[j] = respuestas_numero_in_code[j + 1]
+                            respuestas_hogar_in_code[j] = respuestas_hogar_in_code[j + 1]
 
-            # Compacta los datos
-            i = 0
-            while i <= ultimo_indice:
-                if "".join(matriz_user[i]).strip() == "":
-                    for j in range(i, ultimo_indice):
-                        matriz_user[j] = matriz_user[j + 1]
-                        matriz_pass[j] = matriz_pass[j + 1]
-                        respuestas_numero[j] = respuestas_numero[j + 1]
-                        respuestas_hogar[j] = respuestas_hogar[j + 1]
+                        matriz_user[ultimo_indice] = [" "] * 10
+                        matriz_pass[ultimo_indice] = [" "] * 8
+                        respuestas_numero[ultimo_indice] = []
+                        respuestas_hogar[ultimo_indice] = []
 
-                        matriz_user_in_code[j] = matriz_user_in_code[j + 1]
-                        matriz_pass_in_code[j] = matriz_pass_in_code[j + 1]
-                        respuestas_numero_in_code[j] = respuestas_numero_in_code[j + 1]
-                        respuestas_hogar_in_code[j] = respuestas_hogar_in_code[j + 1]
+                        matriz_user_in_code[ultimo_indice] = [" "] * 10
+                        matriz_pass_in_code[ultimo_indice] = [" "] * 8
+                        respuestas_numero_in_code[ultimo_indice] = []
+                        respuestas_hogar_in_code[ultimo_indice] = []
 
-                    matriz_user[ultimo_indice] = [" "] * 10
-                    matriz_pass[ultimo_indice] = [" "] * 8
-                    respuestas_numero[ultimo_indice] = []
-                    respuestas_hogar[ultimo_indice] = []
+                        ultimo_indice -= 1
 
-                    matriz_user_in_code[ultimo_indice] = [" "] * 10
-                    matriz_pass_in_code[ultimo_indice] = [" "] * 8
-                    respuestas_numero_in_code[ultimo_indice] = []
-                    respuestas_hogar_in_code[ultimo_indice] = []
+                    i += 1
 
-                    ultimo_indice -= 1
-
-                i += 1
-
-            guardar_datos()  # Vuelve a guardar los archivos JSON después de la compactación
-            ventana_datos()  # Actualiza la interfaz gráfica
-            messagebox.showinfo("Usuario Eliminado", "Contenido del usuario eliminado exitosamente")
+                guardar_datos()  # Actualiza los archivos JSON después de la compactación
+                ventana_datos()  # Actualiza la interfaz gráfica
+                messagebox.showinfo("Usuario Eliminado", "Contenido del usuario eliminado exitosamente")
+            else:
+                messagebox.showerror("Error", "Respuestas incorrectas")
             break
 
     if not usuario_encontrado:
@@ -288,34 +318,7 @@ def actualizar_usuario():
     if not usuario_encontrado:
         messagebox.showerror("Error", "Usuario no encontrado.")
 
-def cargar_datos_desde_json():
-    global matriz_user_in_code, matriz_pass_in_code, respuestas_numero_in_code, respuestas_hogar_in_code
-    try:
-        with open(os.path.join(carpeta_datos, "matriz_user.json"), "r") as f:
-            matriz_user_in_code = json.load(f)
-    except FileNotFoundError:
-        matriz_user_in_code = [[" "] * 10 for _ in range(10)]
 
-    try:
-        with open(os.path.join(carpeta_datos, "matriz_pass.json"), "r") as f:
-            matriz_pass_in_code = json.load(f)
-    except FileNotFoundError:
-        matriz_pass_in_code = [[" "] * 8 for _ in range(10)]
-
-    try:
-        with open(os.path.join(carpeta_datos, "respuestas_numero.json"), "r") as f:
-            respuestas_numero_in_code = json.load(f)
-    except FileNotFoundError:
-        respuestas_numero_in_code = [[] for _ in range(10)]
-
-    try:
-        with open(os.path.join(carpeta_datos, "respuestas_hogar.json"), "r") as f:
-            respuestas_hogar_in_code = json.load(f)
-    except FileNotFoundError:
-        respuestas_hogar_in_code = [[] for _ in range(10)]
-
-    # Luego, actualiza la ventana de datos para reflejar los nuevos datos
-    ventana_datos()
 
 def ventana_submenu():
     for widget in ventana.winfo_children():
@@ -335,7 +338,7 @@ def ventana_submenu():
     ordenamientos_button.pack(pady=20)
     ordenamientos_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
     
-    arboles_button = tk.Button(ventana, text="Árboles", height=3, width=15)
+    arboles_button = tk.Button(ventana, text="Árboles", height=3, width=15,command=ventana_arboles)
     arboles_button.pack(pady=20)
     arboles_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
 
@@ -635,27 +638,29 @@ def ventana_ordenamientos():
         
         def burbuja_mejorada(arr):
             n = len(arr)
+            iteraciones = 0
             movimientos = 0
             consultas = 0
-            for i in range(n - 1):
+            for i in range(len(numeros)):
                 swapped = False
-                movimientos_pasada = 0  # Contador de movimientos en la pasada actual
                 for j in range(0, n - i - 1):
                     consultas += 1
                     if arr[j] > arr[j + 1]:
                         arr[j], arr[j + 1] = arr[j + 1], arr[j]
-                        movimientos_pasada += 1
+                        movimientos += 1
                         swapped = True
-                movimientos += movimientos_pasada
-                if not swapped:
+                iteraciones += 1
+                if swapped == False:
                     break
-            return movimientos, consultas
+            return iteraciones, movimientos, consultas
+        
+        iteraciones, movimientos, consultas = burbuja_mejorada(numeros)
 
-        movimientos, consultas = burbuja_mejorada(numeros)
+
 
         lista_ordenada_mejorada.config(text=f"Lista Ordenada: {numeros}")
         lista_original_mejorada.config(text=f"Lista Original: {entrada}")
-        info_burbuja_mejorada.config(text=f"Iteraciones: {len(numeros) - 1}, Movimientos: {movimientos}, Consultas: {consultas}")
+        info_burbuja_mejorada.config(text=f"Iteraciones: {iteraciones}, Movimientos: {movimientos}, Consultas: {consultas}")
     
     boton_ordenar_mejorada = tk.Button(tab_burbuja_mejorada, text="Ordenar", command=ordenar_burbuja_mejorada)
     boton_ordenar_mejorada.pack(pady=10)
@@ -714,25 +719,32 @@ def ventana_ordenamientos():
             resultado_label_insercion.config(text="Error: Se requieren al menos 5 números.")
             return
         
-        def insercion(arr):
-            movimientos = 0
-            consultas = 0
-            for i in range(1, len(arr)):
-                key = arr[i]
-                j = i - 1
-                consultas += 1
-                while j >= 0 and key < arr[j]:
-                    arr[j + 1] = arr[j]
-                    j -= 1
-                    movimientos += 1
-                arr[j + 1] = key
-            return movimientos, consultas
+        def insercion(numbers):
+            iterations = 0
+            movements = 0
+            queries = 0
 
-        movimientos, consultas = insercion(numeros)
+            for i in range(1, len(numbers)):
+                key = numbers[i]
+                j = i - 1
+                queries += 1
+                while j >= 0 and key < numbers[j]:
+                    numbers[j + 1] = numbers[j]
+                    movements += 1
+                    j -= 1
+                numbers[j + 1] = key
+                iterations += 1
+
+            return iterations, movements, queries
+        
+        iteraciones, movimientos, consultas = insercion(numeros)
+
+
+
 
         lista_ordenada_insercion.config(text=f"Lista Ordenada: {numeros}")
         lista_original_insercion.config(text=f"Lista Original: {entrada}")
-        info_insercion.config(text=f"Iteraciones: {len(numeros) - 1}, Movimientos: {movimientos}, Consultas: {consultas}")
+        info_insercion.config(text=f"Iteraciones: {iteraciones}, Movimientos: {movimientos}, Consultas: {consultas}")
 
     boton_ordenar_insercion = tk.Button(tab_insercion, text="Ordenar", command=ordenar_insercion)
     boton_ordenar_insercion.pack(pady=10)
@@ -793,30 +805,49 @@ def ventana_ordenamientos():
         if len(numeros) < 5:
             resultado_label_quicksort.config(text="Error: Se requieren al menos 5 números.")
             return
-    
-        def quicksort(arr, low, high):
-            if low < high:
-                start_time = time.time()  # Iniciar el temporizador
-                pi = particion(arr, low, high)
-                quicksort(arr, low, pi - 1)
-                quicksort(arr, pi + 1, high)
-                end_time = time.time()  # Detener el temporizador
-                return end_time - start_time  # Tiempo transcurrido
-    
-        def particion(arr, low, high):
-            i = low - 1
-            pivot = arr[high]
-            for j in range(low, high):
-                if arr[j] < pivot:
-                    i += 1
-                    arr[i], arr[j] = arr[j], arr[i]
-            arr[i + 1], arr[high] = arr[high], arr[i + 1]
-            return i + 1
 
-        tiempo_transcurrido = quicksort(numeros, 0, len(numeros) - 1)
-        resultado_label_quicksort.config(text=f"Tiempo de ejecución: {tiempo_transcurrido:.6f} segundos")
+        iterations = 0
+        movements = 0
+        queries = 0
+
+        def partition(arr, low, high, movements, queries):
+            i = (low-1)  # index of smaller element
+            pivot = arr[high]  # pivot
+
+            for j in range(low, high):
+                queries += 1
+        # If current element is smaller than or equal to pivot
+                if arr[j] <= pivot:
+            # increment index of smaller element
+                    i = i+1
+                    arr[i], arr[j] = arr[j], arr[i]
+                    movements += 1
+
+            arr[i+1], arr[high] = arr[high], arr[i+1]
+            movements += 1
+            return (i+1, movements, queries)
+        
+        def quicksort(arr, low, high, iterations, movements, queries):
+            if len(arr) == 1:
+                return arr
+            if low < high:
+        # pi is partitioning index, arr[p] is now at right place
+                pi, movements, queries = partition(arr, low, high, movements, queries)
+
+        # Separately sort elements before partition and after partition
+                iterations += 1
+                quicksort(arr, low, pi-1, iterations, movements, queries)
+                quicksort(arr, pi+1, high, iterations, movements, queries)
+            return (arr, iterations, movements, queries)
+        
+
+
+        numeros, iterations, movements, queries = quicksort(numeros, 0, len(numeros)-1, iterations, movements, queries)
+    
         lista_ordenada_quicksort.config(text=f"Lista Ordenada: {numeros}")
         lista_original_quicksort.config(text=f"Lista Original: {entrada}")
+        info_quicksort.config(text=f"Iteraciones: {iterations}, Movimientos: {movements}, Consultas: {queries}")
+
 
     boton_ordenar_quicksort = tk.Button(tab_quicksort, text="Ordenar", command=ordenar_quicksort)
     boton_ordenar_quicksort.pack(pady=10)
@@ -929,13 +960,342 @@ def ventana_ordenamientos():
 
 
 
+################################################################# VENTANA ARBOLES ##########################################################
+
+def ventana_arboles():
+    for widget in ventana.winfo_children():
+        widget.destroy()
+    fondo()
+
+    ventana.geometry("400x400")
+    ventana.resizable(False, False)
+    ventana.config(bg="#FFFFF3")
+
+    # Botones "Ver datos" y "Ordenamientos" centrados y más grandes
+    arbol_binario_button = tk.Button(ventana, text="Arbol Binario", height=3, width=15,command=ventana_arbol_binario)
+    arbol_binario_button.pack(pady=20)
+    arbol_binario_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+
+    arbol_avl_button = tk.Button(ventana, text="Arbol AVL", height=3, width=15,command=ventana_arbol_avl)
+    arbol_avl_button.pack(pady=20)
+    arbol_avl_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+    
+    # Botón "Volver al Menú Principal" en la parte inferior
+    volver_button = tk.Button(ventana, text="Volver",height=3,width=15,command=ventana_submenu)
+    volver_button.pack(side="bottom",pady=10)
+    volver_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
 
 
-        
-        
+##################################################### ARBOL BINARIO ##########################################################
+class Node:
+    def __init__(self, data):
+        self.left = None
+        self.right = None
+        self.data = data
 
+    def insert(self, data):
+        if data < self.data:
+            if self.left is None:
+                self.left = Node(data)
+            else:
+                self.left.insert(data)
+        elif data > self.data:
+            if self.right is None:
+                self.right = Node(data)
+            else:
+                self.right.insert(data)
+def create_binary_tree():
+    global entrada_arbol_binario
+    # Limpia el lienzo antes de dibujar el árbol
+    canvas.delete("all")
+    # Obtiene la entrada del usuario y crea el árbol binario
+    input_str = entrada_arbol_binario.get().strip()
+    try:
+        # Convertir la entrada del usuario en una lista de números
+        numbers = [float(num_str) for num_str in input_str.split(",")]
+    except ValueError:
+        messagebox.showerror("Error", "Ingresa solo números separados por comas.")
+        return
+
+    # Crea un nodo raíz
+    root = Node(numbers[0])
+
+    # Inserta el resto de los números en el árbol
+    for num in numbers[1:]:
+        root.insert(num)
+
+    # Limpia el lienzo antes de dibujar el árbol
+    canvas.delete("all")
+
+    # Función para dibujar el árbol en el lienzo
+    def draw_tree(node, x, y, dx, level=1):
+        if node:
+            canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white")
+            canvas.create_text(x, y, text=str(node.data))
+
+            y_spacing = 100  # Espaciado vertical
+            if node.left:
+                canvas.create_line(x, y + 15, x - dx, y + y_spacing)
+                draw_tree(node.left, x - dx, y + y_spacing, dx / 2, level + 1)
+            if node.right:
+                canvas.create_line(x, y + 15, x + dx, y + y_spacing)
+                draw_tree(node.right, x + dx, y + y_spacing, dx / 2, level + 1)
+
+    dx = 250  # Espaciado horizontal
+    dy = 200  # Espaciado vertical
+
+    draw_tree(root, canvas.winfo_width() // 2, 50, dx)
+
+    # Actualiza el área de desplazamiento del lienzo, permitiendo el desplazamiento horizontal
+    canvas.config(scrollregion=canvas.bbox("all"), xscrollcommand=horizontal_scrollbar.set)
 
     
+        
+
+################################################################# VENTANA ARBOL BINARIO ##########################################################
+def ventana_arbol_binario():
+    global canvas, entrada_arbol_binario, horizontal_scrollbar, vertical_scrollbar
+    for widget in ventana.winfo_children():
+        widget.destroy()
+    ventana.title("Árbol Binario")
+    ventana.geometry("500x500")
+    ventana.resizable(False, False)
+    ventana.config(bg="#FFFFF3")
+
+# Agrega una etiqueta y una entrada de texto
+    label = tk.Label(ventana, text="Ingrese una lista de números separados por comas:")
+    result_label = tk.Label(ventana, text="")
+    result_label.pack()
+    label.pack(pady=10)
+    label.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+
+
+    entrada_arbol_binario = tk.Entry(ventana)
+    entrada_arbol_binario.pack(pady=10)
+    entrada_arbol_binario.config(font=("Arial", 12),borderwidth=2, relief="ridge")
+
+# Agrega un botón para crear el árbol
+    crear_arbol_binario_botton = tk.Button(ventana, text="Crear Árbol Binario",height=2,width=15,command=create_binary_tree)
+    crear_arbol_binario_botton.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+    crear_arbol_binario_botton.pack(side="top",pady=10)
+
+    volver_button = tk.Button(ventana, text="Volver",height=2,width=15,command=ventana_arboles)
+    volver_button.pack(side="bottom",pady=10)
+    volver_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+    
+
+# Agrega un lienzo (canvas) con barras de desplazamiento vertical y horizontal
+    canvas = tk.Canvas(ventana, width=100, height=100)
+    canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+# Agrega una barra de desplazamiento vertical
+    vertical_scrollbar = tk.Scrollbar(ventana, orient="vertical", command=canvas.yview)
+    vertical_scrollbar.pack(side="right", fill="y")
+
+# Agrega una barra de desplazamiento horizontal
+    horizontal_scrollbar = tk.Scrollbar(ventana, orient="horizontal", command=canvas.xview)
+    horizontal_scrollbar.pack(side="bottom", fill="x")
+
+# Crea un marco para contener el contenido del lienzo
+    frame = tk.Frame(canvas)
+    canvas.create_window((4, 4), window=frame, anchor="nw")
+################################################################" ARBOL AVL ##########################################################
+class AVLNode:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+        self.height = 1
+
+class AVLTree:
+    def __init__(self):
+        self.root = None
+
+    def _height(self, node):
+        if not node:
+            return 0
+        return node.height
+
+    def _update_height(self, node):
+        if not node:
+            return 0
+        node.height = 1 + max(self._height(node.left), self._height(node.right))
+
+    def _balance_factor(self, node):
+        if not node:
+            return 0
+        return self._height(node.left) - self._height(node.right)
+
+    def _rotate_right(self, y):
+        x = y.left
+        T2 = x.right
+
+        x.right = y
+        y.left = T2
+
+        self._update_height(y)
+        self._update_height(x)
+
+        return x
+
+    def _rotate_left(self, x):
+        y = x.right
+        T2 = y.left
+
+        y.left = x
+        x.right = T2
+
+        self._update_height(x)
+        self._update_height(y)
+
+        return y
+
+    def insert(self, node, data):
+        if not node:
+            return AVLNode(data)
+        
+        if data < node.data:
+            node.left = self.insert(node.left, data)
+        else:
+            node.right = self.insert(node.right, data)
+
+        self._update_height(node)
+
+        balance = self._balance_factor(node)
+
+        if balance > 1:
+            if data < node.left.data:
+                return self._rotate_right(node)
+            else:
+                node.left = self._rotate_left(node.left)
+                return self._rotate_right(node)
+
+        if balance < -1:
+            if data > node.right.data:
+                return self._rotate_left(node)
+            else:
+                node.right = self._rotate_right(node.right)
+                return self._rotate_left(node)
+
+        return node
+
+class TreeVisualization:
+    def __init__(self, root):
+        self.root = root
+        self.canvas = tk.Canvas(root, width=600, height=400)
+        self.canvas.pack()
+        self.draw_tree(self.root, 300, 50, 200)
+
+    def draw_tree(self, node, x, y, dx):
+        if node:
+            self.canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white")
+            self.canvas.create_text(x, y, text=str(node.data))
+
+            y_spacing = 100  # Espaciado vertical
+            if node.left:
+                self.canvas.create_line(x, y + 15, x - dx, y + y_spacing)
+                self.draw_tree(node.left, x - dx, y + y_spacing, dx / 2)
+            if node.right:
+                self.canvas.create_line(x, y + 15, x + dx, y + y_spacing)
+                self.draw_tree(node.right, x + dx, y + y_spacing, dx / 2)
+
+def create_avl_tree():
+    global entrada_arbol_avl, canvas, horizontal_scrollbar
+    # Limpia el lienzo antes de dibujar el árbol AVL
+    canvas.delete("all")
+    
+    input_str = entrada_arbol_avl.get().strip()
+    try:
+        numbers = [float(num_str) for num_str in input_str.split(",")]
+    except ValueError:
+        messagebox.showerror("Error", "Ingresa solo números separados por comas.")
+        return
+
+    avl_tree = AVLTree()
+    
+    for num in numbers:
+        avl_tree.root = avl_tree.insert(avl_tree.root, num)
+
+    # Limpia el lienzo antes de dibujar el árbol AVL
+    canvas.delete("all")
+
+    def draw_avl_tree(node, x, y, dx):
+        if node:
+            canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white")
+            canvas.create_text(x, y, text=str(node.data))
+
+            y_spacing = 100  # Espaciado vertical
+            if node.left:
+                canvas.create_line(x, y + 15, x - dx, y + y_spacing)
+                draw_avl_tree(node.left, x - dx, y + y_spacing, dx / 2)
+            if node.right:
+                canvas.create_line(x, y + 15, x + dx, y + y_spacing)
+                draw_avl_tree(node.right, x + dx, y + y_spacing, dx / 2)
+
+    dx = 250  # Espaciado horizontal
+    dy = 200  # Espaciado vertical
+
+    draw_avl_tree(avl_tree.root, canvas.winfo_width() // 2, 50, dx)
+
+    # Actualiza el área de desplazamiento del lienzo, permitiendo el desplazamiento horizontal
+    canvas.config(scrollregion=canvas.bbox("all"), xscrollcommand=horizontal_scrollbar.set)
+
+
+
+
+
+
+
+################################################################# VENTANA ARBOL AVL ##########################################################
+def ventana_arbol_avl():
+    global canvas, entrada_arbol_avl, horizontal_scrollbar, vertical_scrollbar
+    for widget in ventana.winfo_children():
+        widget.destroy()
+    ventana.title("Árbol AVL")
+    ventana.geometry("500x500")
+    ventana.resizable(False, False)
+    ventana.config(bg="#FFFFF3")
+
+# Agrega una etiqueta y una entrada de texto
+    label = tk.Label(ventana, text="Ingrese una lista de números separados por comas:")
+    label.pack(pady=10)
+    label.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+
+
+    entrada_arbol_avl = tk.Entry(ventana)
+    entrada_arbol_avl.pack(pady=10)
+    entrada_arbol_avl.config(font=("Arial", 12),borderwidth=2, relief="ridge")
+
+# Agrega un botón para crear el árbol
+    crear_arbol_avl_botton = tk.Button(ventana, text="Crear Árbol AVL",height=2,width=15,command=create_avl_tree)
+    crear_arbol_avl_botton.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+    crear_arbol_avl_botton.pack(side="top",pady=10)
+
+    volver_button = tk.Button(ventana, text="Volver",height=2,width=15,command=ventana_arboles)
+    volver_button.pack(side="bottom",pady=10)
+    volver_button.config(font=("Arial", 12,"bold"),borderwidth=2, relief="ridge",bg="#151918",fg="white")
+    
+
+# Agrega un lienzo (canvas) con barras de desplazamiento vertical y horizontal
+    canvas = tk.Canvas(ventana, width=100, height=100)
+    canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+# Agrega una barra de desplazamiento vertical
+    vertical_scrollbar = tk.Scrollbar(ventana, orient="vertical", command=canvas.yview)
+    vertical_scrollbar.pack(side="right", fill="y")
+
+# Agrega una barra de desplazamiento horizontal
+    horizontal_scrollbar = tk.Scrollbar(ventana, orient="horizontal", command=canvas.xview)
+    horizontal_scrollbar.pack(side="bottom", fill="x")
+
+# Crea un marco para contener el contenido del lienzo
+    frame = tk.Frame(canvas)
+    canvas.create_window((4, 4), window=frame, anchor="nw")
+
+# Agrega una etiqueta para mostrar errores
+    result_label = tk.Label(ventana, text="")
+    result_label.pack()
+################################################################## VENTANA REGISTRO  ####################################################################################################
 # Función para cambiar la ventana a la ventana de registro
 def ventana_registro():
     global username_entry, password_entry, numero_entry, hogar_entry
